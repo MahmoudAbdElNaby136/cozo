@@ -1,0 +1,39 @@
+﻿@model cozo.ViewModels.ItemPM
+@{
+    ViewBag.Title = Model.IsNew ? "Create Item" : "Edit Item";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm("Form", "Items", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.IsNew)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name)
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Quantity)
+        @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Quantity)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Price)
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Price)
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(Model.IsNew ? "Create" : "Save Changes")
+    </button>
+
+}
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

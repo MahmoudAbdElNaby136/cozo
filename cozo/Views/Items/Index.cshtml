@@ -1,0 +1,73 @@
+﻿@model List<cozo.ViewModels.ItemList>
+
+@{
+    ViewBag.Title = "Items List";
+}
+
+<h2>Items</h2>
+
+@using (Html.BeginForm("Index", "Items", FormMethod.Get))
+{
+    <div class="form-inline mb-3">
+        <div class="form-group">
+            @Html.LabelFor(model => model, "Search: ", new { @class = "mr-2" })
+            @Html.TextBox("search", Request["search"], new { @class = "form-control" })
+        </div>
+
+        <div class="form-group ml-3">
+            @Html.LabelFor(model => model, "Sort by: ", new { @class = "mr-2" })
+            @Html.DropDownList("sort", new SelectList(new[]
+            {
+                new { Value = "", Text = "Select Sort" },
+                new { Value = "quantity", Text = "Quantity ↑" },
+                new { Value = "quantity_desc", Text = "Quantity ↓" },
+                new { Value = "price", Text = "Price ↑" },
+                new { Value = "price_desc", Text = "Price ↓" }
+            }, "Value", "Text", Request["sort"]), new { @class = "form-control" })
+        </div>
+
+        <button type="submit" class="btn btn-primary ml-3">Apply</button>
+    </div>
+}
+
+<p>
+    @Html.ActionLink("Create New", "Form", "Items", null, new { @class = "btn btn-success" })
+</p>
+
+<!-- Items List Table -->
+<table class="table table-bordered">
+    @*<tr>
+            <th>@Html.ActionLink("Name", "Index", new { search = Request["search"], sort = "" })</th>
+            <th>
+                @Html.ActionLink("Quantity ↑", "Index", new { search = Request["search"], sort = "quantity" }) |
+                @Html.ActionLink("↓", "Index", new { search = Request["search"], sort = "quantity_desc" })
+            </th>
+            <th>
+                @Html.ActionLink("Price ↑", "Index", new { search = Request["search"], sort = "price" }) |
+                @Html.ActionLink("↓", "Index", new { search = Request["search"], sort = "price_desc" })
+            </th>
+            <th>Actions</th>
+        </tr>*@
+    <tr>
+        <th>Name</th>
+        <th>
+            Quantity
+        </th>
+        <th>
+            Price
+        </th>
+        <th>Actions</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Quantity</td>
+            <td>@item.Price</td>
+            <td>
+                @Html.ActionLink("Edit", "Form", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm" })
+            </td>
+        </tr>
+    }
+</table>
