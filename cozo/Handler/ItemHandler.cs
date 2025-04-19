@@ -21,12 +21,11 @@ namespace cozo.Handler
             {
                 query = query.Where(i => i.Name.Contains(model.SearchTerm));
             }
-            // ✅ Calculate total pages before pagination
-    int totalCount = query.Count();
+           
+             int totalCount = query.Count();
             model.TotalPages = (int)Math.Ceiling((double)totalCount / pagesize);
 
-            // Ensure valid page number
-            if (pagenumber < 1) pagenumber = 1;
+            //if (pagenumber < 1) pagenumber = 1;
             if (pagenumber > model.TotalPages) pagenumber = model.TotalPages;
             switch (model.SortOrder)
             {
