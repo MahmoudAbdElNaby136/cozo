@@ -1,0 +1,37 @@
+﻿@model cozo.ViewModels.ItemPM
+
+@using (Html.BeginForm("Save", "Items", FormMethod.Post, new { id = "itemForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.IsNew)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name)
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Quantity)
+        @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Quantity)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Price)
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Price)
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(Model.IsNew ? "Create" : "Save Changes")
+    </button>
+    @*<a href="/Items/DeleteOne/@Model.Id" class="btn btn-danger">Delete</a>*@
+    <button type="button" class="btn btn-danger" onclick="openFormDeleteModal(@Model.Id, '@Model.Name', '@Model.Price', '@Model.Quantity')">Delete</button>
+
+
+}
+
+
+

@@ -1,0 +1,59 @@
+﻿@model List<cozo.ViewModels.ItemDTO>
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int nextPage = currentPage + 1;
+    int previousPage = currentPage - 1;
+    int totalPages = ViewBag.TotalPages ?? 1;}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="@item.Id">
+                <td>@item.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.Price</td>
+                <td>
+                    @Html.ActionLink("Edit", "Form", new { id = item.Id }, new { @class = "btn btn-primary btn-sm" }) |
+                    <button class="btn btn-danger" onclick="openConfirmationModal(@item.Id,'@item.Name','@item.Price','@item.Quantity')">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4">
+                <div class="pagination text-center">
+                    @if (currentPage > 1)
+                    {
+                        <button class="btn btn-primary" onclick="ajaxPagination(@previousPage)">Previous</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" disabled>Previous</button>
+                    }
+
+                    <span>Page @currentPage of @totalPages</span>
+                    @if (currentPage < totalPages)
+                    {
+                        <button class="btn btn-primary" onclick="ajaxPagination(@nextPage)">Next</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" disabled>Next</button>
+                    }
+
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Web;
+using System.Web.UI;
 using cozo.Models;
 using cozo.ViewModels;
 
@@ -9,44 +11,53 @@ namespace cozo.Handler
 {
     public class ItemHandler
     {
-        private StoreEntities1 db = new StoreEntities1();
-        public List<ItemList> GetList(string SearchTerm = null, string SortOrder = null)
+        private  StoreEntities1 db = new StoreEntities1();
+        public List<ItemDTO> GetList(ItemsList model)
         {
-            var Query = db.Items.AsQueryable();
-
-            if (!string.IsNullOrEmpty(SearchTerm))
+            int pagesize = 10;
+            int pagenumber = model.Page;
+            var query = db.Items.AsQueryable();
+            if (!string.IsNullOrEmpty(model.SearchTerm))
             {
-                Query = Query.Where(i => i.Name.Contains(SearchTerm));
+                query = query.Where(i => i.Name.Contains(model.SearchTerm));
             }
+            // ✅ Calculate total pages before pagination
+    int totalCount = query.Count();
+            model.TotalPages = (int)Math.Ceiling((double)totalCount / pagesize);
 
-            switch (SortOrder)
+            // Ensure valid page number
+            if (pagenumber < 1) pagenumber = 1;
+            if (pagenumber > model.TotalPages) pagenumber = model.TotalPages;
+            switch (model.SortOrder)
             {
                 case "quantity":
-                    Query = Query.OrderBy(i => i.Quuantity);
+                    query = query.OrderBy(i => i.Quuantity);
                     break;
                 case "quantity_desc":
-                    Query = Query.OrderByDescending(i => i.Quuantity);
+                    query = query.OrderByDescending(i => i.Quuantity);
                     break;
                 case "price":
-                    Query = Query.OrderBy(i => i.Price);
+                    query = query.OrderBy(i => i.Price);
                     break;
                 case "price_desc":
-                    Query = Query.OrderByDescending(i => i.Price);
+                    query = query.OrderByDescending(i => i.Price);
                     break;
                 default:
-                    Query = Query.OrderBy(i => i.Id);
+                    query = query.OrderBy(i => i.Id);
                     break;
             }
 
-            return Query
-                .Select(Item => new ItemList
-                {
-                    Id = Item.Id,
-                    Name = Item.Name,
-                    Quantity = Item.Quuantity,
-                    Price = Item.Price
-                }).ToList();
+            return query.Skip((pagenumber - 1) * pagesize)
+                        .Take(pagesize)
+                        .Select(item => new ItemDTO
+                        {
+                            Id = item.Id,
+                            Name = item.Name,
+                            Quantity = item.Quuantity,
+                            Price = item.Price
+                        }).ToList();
         }
+
         public ItemPM GetSingle(int? id)
         {
             var item = db.Items.Find(id);
@@ -60,72 +71,35 @@ namespace cozo.Handler
                 Name = item.Name,
                 Quantity = item.Quuantity,
                 Price = item.Price,
-                IsNew = true
+                IsNew = false
             };
         }
-        //public void Save(ItemPM model)
-        //{
-        //    if (model.IsNew)
-        //    {
-        //        int newId = db.Items.Any() ? db.Items.Max(i => i.Id) + 1 : 1;
-
-        //        var newItem = new Item
-        //        {
-        //            Id = newId,
-        //            Name = model.Name,
-        //            Quuantity = model.Quantity,
-        //            Price = (decimal)model.Price
-        //        };
-
-        //        db.Items.Add(newItem);
-        //        model.Id = newId; // So controller can redirect
-        //    }
-        //    else
-        //    {
-        //        var item = db.Items.Find(model.Id);
-        //        if (item != null)
-        //        {
-        //            item.Name = model.Name;
-        //            item.Quuantity = model.Quantity;
-        //            item.Price = (decimal)model.Price;
-        //        }
-        //    }
-
-        //    db.SaveChanges();
-        //}
-        public void Save(ItemPM model)
+        public void Save(ItemPM ItemPM)
         {
-            var item = db.Items.Find(model.Id);
-
-            if (item == null)
+            if (ItemPM.IsNew)
             {
-                // Create new
                 int newId = db.Items.Any() ? db.Items.Max(i => i.Id) + 1 : 1;
-
-                var newItem = new Item
+                var NewItem = new Item
                 {
                     Id = newId,
-                    Name = model.Name,
-                    Quuantity = model.Quantity,
-                    Price = (decimal)model.Price
+                    Name = ItemPM.Name,
+                    Quuantity = ItemPM.Quantity,
+                    Price = (decimal)ItemPM.Price
                 };
-
-                db.Items.Add(newItem);
-                model.Id = newId; // So we can redirect to edit mode
+                db.Items.Add(NewItem);
+                ItemPM.Id = newId;
             }
             else
             {
-                // Update existing
-                item.Name = model.Name;
-                item.Quuantity = model.Quantity;
-                item.Price = (decimal)model.Price;
+                var item = db.Items.Find(ItemPM.Id);
+                item.Name = ItemPM.Name;
+                item.Quuantity = ItemPM.Quantity;
+                item.Price = (decimal)ItemPM.Price;
             }
-
             db.SaveChanges();
         }
 
-
-        public void Delete(int id)
+        public void Delete(int? id)
         {
             var item = db.Items.Find(id);
             if (item != null)

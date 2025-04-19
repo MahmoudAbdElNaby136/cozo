@@ -15,64 +15,51 @@ namespace cozo.Controllers
 {
     public class ItemsController : Controller
     {
-        private readonly ItemHandler _handler = new ItemHandler();
-
-        public ActionResult Index(string search, string sort)
+        private readonly ItemHandler Handler = new ItemHandler();
+        [HttpGet]
+        public ActionResult Index(ItemsList model)
         {
-            var items = _handler.GetList(search, sort);
-            ViewBag.Search = search;
-            ViewBag.Sort = sort;
-            return View(items);
+            model.Items = Handler.GetList(model); 
+            ViewBag.CurrentPage = model.Page;
+            ViewBag.TotalPages = model.TotalPages;
+            if (model.SearchTerm==null && model.SortOrder==null)
+            {
+                return View(model);
+            }
+            return PartialView("_TablePartialView", model.Items);
         }
 
+        [HttpGet]
         public ActionResult Form(int? id)
         {
             if (id.HasValue)
             {
-                try
-                {
-                    var model = _handler.GetSingle(id.Value);
-                    return View(model);
-                }
-                catch (Exception ex)
-                {
-                    TempData["Error"] = ex.Message;
-                    return RedirectToAction("Index");
-                }
+                var Item = Handler.GetSingle(id);
+                return View(Item);
             }
-
-            return View(ItemPM.Create()); // Create mode
+            return View(ItemPM.Create());
         }
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Form(ItemPM model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(model);
-        //    }
-
-        //    _handler.Save(model);
-        //    return RedirectToAction("Form", new { id = model.Id });
-        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Form(ItemPM model)
+        public ActionResult Save(ItemPM itemPM)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return PartialView("_ItemFormPartial", itemPM);
             }
-
-            _handler.Save(model);
-            return RedirectToAction("Form", new { id = model.Id });
+            Handler.Save(itemPM);
+            return RedirectToAction("Form", new { id = itemPM.Id });
+        }
+        [HttpPost]
+        public ActionResult Delete(int? Id)
+        {
+            Handler.Delete(Id);
+            return Json(new { });
         }
 
-
-        public ActionResult Delete(int id)
+        public ActionResult DeleteOne(int? Id)
         {
-            _handler.Delete(id);
+            Handler.Delete(Id);
             return RedirectToAction("Index");
         }
     }

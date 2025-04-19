@@ -5,7 +5,7 @@ using System.Web;
 
 namespace cozo.ViewModels
 {
-    public class ItemList
+    public class ItemDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
